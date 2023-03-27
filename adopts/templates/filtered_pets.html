@@ -1,0 +1,42 @@
+{% extends 'adopts.html' %}
+{% load static %}
+
+{% block breed_options %}
+{% for breed in all_breeds %}
+    <option {% if raca == breed %}selected{% endif %} value="{{breed.id}}">
+        {{breed}}
+    </option>
+{% endfor %}
+{% endblock breed_options %}
+
+{% block pets_objs %}
+
+{% for pet in filtered_pets %}
+    <tr class="tabela-linha">
+        <td width="20%">
+            <a href="{% url 'see_pet' pet.id %}"><img width="40%" src="{{pet.foto.url}}"></a>
+        </td>
+        <td>
+            {{pet.nome}}
+        </td>
+        <td>
+            {{pet.raça}}
+            
+        </td>
+        <td>
+            {% if pet.status == "P" %}
+                <span class="badge text-bg-primary">Para adoção</span>
+            {% elif pet.status == "A" %}
+                <span class="badge text-bg-success">Adotado</span>
+            {% endif%}
+
+           
+            
+        </td>
+        <td>
+            {{pet.cidade}}
+        </td>
+    </tr>
+{% endfor %}
+
+{% endblock pets_objs %}
