@@ -7,6 +7,7 @@ from . import validators
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
+from django.db.models import Q
 
 
 def list_pets(request):
@@ -27,11 +28,8 @@ def filter_pets(request):
     breed = request.GET.getlist('raca')[0]
     breed = Raça.objects.get(id=breed)
     all_breeds = Raça.objects.all()
-    print(
-        '\nESTADO: ', state,
-        '\nRAÇA:', breed
-    )
-    filtered_pets = Pet.objects.filter(estado=state, raça__id=breed.pk, status='p')
+
+    filtered_pets = Pet.objects.filter(Q(estado=state)|Q(raça__id=breed.pk), status='P')
     if breed.raça == 'Todas as raças':
         filtered_pets = Pet.objects.all()
         

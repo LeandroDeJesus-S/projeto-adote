@@ -12,20 +12,26 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from django.contrib.messages import constants
+import os
+import environ
+from django.core.exceptions import ImproperlyConfigured
 
-
+env = environ.Env(DEBUG=(bool, False))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fv2q&phvpm5ncm$n!5o*zj*k6pcj0)j(l@j_3zi7_zd1lq6rh)'
+SECRET_KEY = env('SECRET_KEY')
+if SECRET_KEY is None:
+    raise ImproperlyConfigured('A variável SECRET_KEY precisa ser definida.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
