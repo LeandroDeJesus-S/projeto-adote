@@ -3,40 +3,51 @@ from django.urls import reverse
 from divulgation.models import Pet, Raça
 from .models import AdoçõesPedido
 from divulgation.views import states
-from . import validators
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.core.paginator import Paginator
 
 
 def list_pets(request):
     pets = Pet.objects.filter(status='P')
     breeds = Raça.objects.all()
-    context = {'pets': pets, 'breeds': breeds}
+    
+    paginator = Paginator(pets, per_page=10)
+    num_page = request.GET.get('page')
+    page_obj = paginator.get_page(num_page)
+    
+    context = {'page_obj': page_obj, 'breeds': breeds, 'states': states(request)}
     if request.method == 'GET':
         return render(request, 'adopts.html', context)
 
-    context = {'pets': pets, 'breeds': breeds}
+    context = {'page_obj': page_obj, 'breeds': breeds}
     return render(request, 'adopts.html', context)
 
 def filter_pets(request):
     if request.method == 'POST':
         return redirect(request.META.get('http_referer', '/'))
     
-    state = request.GET.get('estado')
+    all_breeds = Raça.objects.all()
+    all_states = states(request)
+    state = request.GET.getlist('estado', [all_states[0]['id']])[0]
     breed = request.GET.getlist('raca')[0]
     breed = Raça.objects.get(id=breed)
-    all_breeds = Raça.objects.all()
-
-    filtered_pets = Pet.objects.filter(Q(estado=state)|Q(raça__id=breed.pk), status='P')
+    
+    filtered_pets = Pet.objects.filter(estado=state, raça__id=breed.pk, status='P')
     if breed.raça == 'Todas as raças':
-        filtered_pets = Pet.objects.all()
-        
+        filtered_pets = Pet.objects.filter(estado=state, status='P')
+    
+    paginator = Paginator(filtered_pets, per_page=10)
+    num_page = request.GET.get('page')
+    page_obj = paginator.get_page(num_page)
+    
     context = {
-        'filtered_pets': filtered_pets, 
+        'page_obj': page_obj, 
         'all_breeds': all_breeds,
-        'raca': breed
+        'raca': breed,
+        'all_states': all_states,
+        'filtered_state': state
     }
     return render(request, 'filtered_pets.html', context)
 
@@ -54,7 +65,6 @@ def solicitation(request, pet_id):
         messages.warning(request, 'Esse pet já foi adotado.')
         return redirect('list_pets')
 
-    redirect_to = request.META.get('http_referer')
     adoption_request = AdoçõesPedido(
         pet=pet.first(), usuário=request.user,
 

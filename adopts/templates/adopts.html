@@ -4,7 +4,7 @@
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cadastro</title>
+    <title>ADO.TE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'users/css/cadaster.css' %}" rel="stylesheet">
     <link href="{% static 'divulgation/css/newpet.css' %}" rel="stylesheet">
@@ -49,7 +49,16 @@
                             <form action="{% url 'filter_pets' %}" method="GET">{% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <input type="text" placeholder="Estado..." value="{{request.GET.estado}}" name="estado" class="form-control">
+                                        <select class="form-select" name="estado">
+                                            {% block state_option %}
+                                            {% for state in states %}
+                                                <option value="{{state.id}}">
+                                                    {{state.estado}}
+                                                </option>
+                                            {% endfor %}
+                                            {% endblock state_option %}
+                                        </select>
+                                        {% comment %} <input type="text" placeholder="Estado..." value="{{request.GET.estado}}" name="estado" class="form-control"> {% endcomment %}
                                     </div>
 
                                     <div class="col-md-4">
@@ -64,7 +73,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-2">
+                                        {% block btn_filter %}
                                         <input type="submit" class="btn-custom-secondary" value="FILTRAR">
+                                        {% endblock btn_filter %}
                                     </div>
                                 </div>
                             </form>
@@ -78,7 +89,8 @@
                                     <th>Cidade</th>
                                 </tr>
                                 {% block pets_objs %}
-                                {% for pet in pets %}
+
+                                {% for pet in page_obj %}
                                     <tr class="tabela-linha">
                                         <td width="20%">
                                             <a href="{% url 'see_pet' pet.id %}"><img width="40%" src="{{pet.foto.url}}"></a>
@@ -105,9 +117,14 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
+
                                 {% endblock pets_objs %}
                                 
                             </table>
+                            <div class="mt-4 d-flex justify-content-center align-items-center">
+                                {% include 'partials/_pagination.html' %}
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

@@ -24,12 +24,18 @@ def validate_phone_number(number):
         )
 
 
+def cities(state_code):
+    import requests as rq
 
+    api = f'https://servicodados.ibge.gov.br/api/v1/localidades/estados/{state_code}/municipios'
+    req = rq.get(api).json()
+    cities = [i['nome'] for i in req]
+    return cities
 
 
 def validate_city(city, state_code):
-    state_citys = citys(state_code)
-    for c in state_citys:
+    state_cities = cities(state_code)
+    for c in state_cities:
         if city.lower() == c.lower():
             return
     raise ValidationError(

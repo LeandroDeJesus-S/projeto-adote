@@ -21,14 +21,6 @@ def states(request) -> list:
         )
         return []
 
-def cities(state_code):
-    import requests as rq
-
-    api = f'https://servicodados.ibge.gov.br/api/v1/localidades/estados/{state_code}/municipios'
-    req = rq.get(api).json()
-    cities = [i['nome'] for i in req]
-    return cities
-
 
 @login_required(login_url='users:login')
 def new_pet(request):
@@ -36,11 +28,6 @@ def new_pet(request):
     RACAS = Raça.objects.order_by('raça')
     STATES = states(request)
     context = {'tags': TAGS, 'racas': RACAS, 'estados': STATES}
-    has_state = request.POST.get('has_state')
-    if has_state:
-        context.update({'cidades': city(STATES)})
-    if not STATES:
-        return render(request, 'newpet.html', context)
 
     if request.method == 'GET':
         return render(request, 'newpet.html', context)
@@ -54,13 +41,14 @@ def new_pet(request):
     tags = request.POST.getlist('tags')
     raca = request.POST.get('raca')
     raca = Raça.objects.get(id=raca)
-    
+    print('estado---->',state)
+    print('cidade---->',city)
     try:
         validators.validate_empty_fields(
             photo, name, description, state,
             city, phone, raca, tags
         )
-        # validators.validate_city(city, state)
+        validators.validate_city(city, state)
         validators.validate_phone_number(phone)
     except Exception as msg:
         msg = list(msg)
@@ -69,17 +57,17 @@ def new_pet(request):
     
     pet = Pet(
         usuário=request.user, foto=photo, nome=name, descrição=description,
-        estado=state, cidade=city, telefone=phone, raça=raca
+        estado=state, cidade=city, telefone=phone, raça=raca, status='P'
     )
-    # pet.save()
+    pet.save()
 
     for tag in tags:
         tag_name = Tag.objects.get(id=tag)
         pet.tags.add(tag_name)
-    # pet.save()
+    pet.save()
     
     messages.success(request, f'Pet "{name}" adicionado com sucesso.')
-    return redirect('see_pet', pet_id=pet.id)
+    return redirect('my_pets')
 
 
 @login_required(login_url='users:login')
