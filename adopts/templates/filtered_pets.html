@@ -1,6 +1,18 @@
 {% extends 'adopts.html' %}
 {% load static %}
 
+<!-- select dos estados -->
+{% block state_option %}
+{% for state in all_states %}
+    <option {% if filtered_state == state.id %}selected{% endif %} value="{{state.id}}">
+        {{state.estado}}
+    </option>
+{% endfor %}
+{% endblock state_option %}
+<!-- select dos estados -->
+
+
+<!-- select das raças -->
 {% block breed_options %}
 {% for breed in all_breeds %}
     <option {% if raca == breed %}selected{% endif %} value="{{breed.id}}">
@@ -8,13 +20,18 @@
     </option>
 {% endfor %}
 {% endblock breed_options %}
+<!-- select das raças -->
 
+
+<!-- resultado de filtro dos pets -->
 {% block pets_objs %}
 
-{% for pet in filtered_pets %}
+{% for pet in page_obj %}
     <tr class="tabela-linha">
         <td width="20%">
-            <a href="{% url 'see_pet' pet.id %}"><img width="40%" src="{{pet.foto.url}}"></a>
+            <a href="{% url 'see_pet' pet.id %}">
+                <img width="40%" src="{{pet.foto.url}}">
+            </a>
         </td>
         <td>
             {{pet.nome}}
@@ -24,13 +41,12 @@
             
         </td>
         <td>
+
             {% if pet.status == "P" %}
                 <span class="badge text-bg-primary">Para adoção</span>
             {% elif pet.status == "A" %}
                 <span class="badge text-bg-success">Adotado</span>
             {% endif%}
-
-           
             
         </td>
         <td>
@@ -40,3 +56,4 @@
 {% endfor %}
 
 {% endblock pets_objs %}
+<!-- resultado de filtro dos pets -->
